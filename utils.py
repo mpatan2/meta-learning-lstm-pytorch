@@ -1,4 +1,5 @@
 from __future__ import division, print_function, absolute_import
+from torch.utils.tensorboard import SummaryWriter
 
 import os
 import pdb
@@ -62,6 +63,9 @@ class GOATLogger:
         elif kwargs['phase'] == 'eval':
             self.stats['eval']['loss'].append(kwargs['loss'])
             self.stats['eval']['acc'].append(kwargs['acc'])
+            # print(kwargs)
+            # tb.add_scalar('total loss', kwargs['loss'])
+
 
         elif kwargs['phase'] == 'evaldone':
             loss_mean = np.mean(self.stats['eval']['loss'])

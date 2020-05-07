@@ -3,7 +3,7 @@
 # For 5-shot, 5-class evaluation, hyper-parameters follow github.com/twitter/meta-learning-lstm
 
 python main.py --mode test \
-               --resume logs-719/ckpts/meta-learner-42000.pth.tar \
+               --resume logs-685/ckpts/meta-learner-49000.pth.tar \
                --n-shot 5 \
                --n-eval 15 \
                --n-class 5 \
@@ -19,6 +19,6 @@ python main.py --mode test \
                --bn-momentum 0.95 \
                --bn-eps 1e-3 \
                --data miniimagenet \
-               --data-root data/miniImagenet/ \
+               --data-root ../miniImagenet/ \
                --pin-mem True \
                --log-freq 100

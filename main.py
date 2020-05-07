@@ -15,6 +15,7 @@ from learner import Learner
 from metalearner import MetaLearner
 from dataloader import prepare_data
 from utils import *
+from torch.utils.tensorboard import SummaryWriter
 
 
 FLAGS = argparse.ArgumentParser()
@@ -74,6 +75,7 @@ FLAGS.add_argument('--seed', type=int,
 
 
 def meta_test(eps, eval_loader, learner_w_grad, learner_wo_grad, metalearner, args, logger):
+    tb = SummaryWriter()
     for subeps, (episode_x, episode_y) in enumerate(tqdm(eval_loader, ascii=True)):
         train_input = episode_x[:, :args.n_shot].reshape(-1, *episode_x.shape[-3:]).to(args.dev) # [n_class * n_shot, :]
         train_target = torch.LongTensor(np.repeat(range(args.n_class), args.n_shot)).to(args.dev) # [n_class * n_shot]
@@ -93,6 +95,8 @@ def meta_test(eps, eval_loader, learner_w_grad, learner_wo_grad, metalearner, ar
         acc = accuracy(output, test_target)
  
         logger.batch_info(loss=loss.item(), acc=acc, phase='eval')
+        tb.add_scalar('Test-Loss', loss.item(), subeps)
+        tb.add_scalar('Test-Accuracy', acc, subeps)
 
     return logger.batch_info(eps=eps, totaleps=args.episode_val, phase='evaldone')
 
@@ -127,7 +131,7 @@ def train_learner(learner_w_grad, metalearner, train_input, train_target, args):
 
 
 def main():
-
+    tb = SummaryWriter()
     args, unparsed = FLAGS.parse_known_args()
     if len(unparsed) != 0:
         raise NameError("Argument {} not recognized".format(unparsed))
@@ -200,6 +204,8 @@ def main():
         optim.step()
 
         logger.batch_info(eps=eps, totaleps=args.episode, loss=loss.item(), acc=acc, phase='train')
+        tb.add_scalar('Train-Loss', loss.item(), eps)
+        tb.add_scalar('Train-Accuracy', acc, eps)
 
         # Meta-validation
         if eps % args.val_freq == 0 and eps != 0:
